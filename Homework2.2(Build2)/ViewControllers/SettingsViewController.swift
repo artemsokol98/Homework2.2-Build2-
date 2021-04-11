@@ -24,7 +24,6 @@ class SettingsViewController: UIViewController {
     @IBOutlet weak var greenTF: UITextField!
     @IBOutlet weak var blueTF: UITextField!
     
-    
     var color: Color!
     var delegate: SettingsViewControllerDelegate!
     
@@ -58,7 +57,10 @@ class SettingsViewController: UIViewController {
         greenTF.addDoneButtonToKeyboard()
         blueTF.addDoneButtonToKeyboard()
         
-        settingsView.backgroundColor = UIColor(displayP3Red: CGFloat(color.red), green: CGFloat(color.green), blue: CGFloat(color.blue), alpha: 1)
+        settingsView.backgroundColor = UIColor(displayP3Red: CGFloat(color.red),
+                                               green: CGFloat(color.green),
+                                               blue: CGFloat(color.blue),
+                                               alpha: 1)
         
         redSlider.minimumTrackTintColor = .red
         greenSlider.minimumTrackTintColor = .green
@@ -72,7 +74,10 @@ class SettingsViewController: UIViewController {
     // MARK: - IB Actions
     
     @IBAction func rgbSlider(_ sender: UISlider) {
-        setColor()
+        settingsView.backgroundColor = UIColor(displayP3Red: CGFloat(redSlider.value),
+                                               green: CGFloat(greenSlider.value),
+                                               blue: CGFloat(blueSlider.value),
+                                               alpha: 1)
         switch sender {
         case redSlider:
             setValue(for: redLabel, for: redTF)
@@ -83,9 +88,13 @@ class SettingsViewController: UIViewController {
         }
     }
     
-    private func setColor() {
-        settingsView.backgroundColor = UIColor(displayP3Red: CGFloat(redSlider.value), green: CGFloat(greenSlider.value), blue: CGFloat(blueSlider.value), alpha: 1)
+    @IBAction func saveSettingsButton() {
+        view.endEditing(true)
+        delegate.setValues(for: color)
+        dismiss(animated: true)
     }
+    
+    // MARK: - Private Methods
     
     private func setValue(for labels: UILabel..., for textField: UITextField) {
         labels.forEach { label in
@@ -111,25 +120,13 @@ class SettingsViewController: UIViewController {
                 blueTF.text = string(from: blueSlider)
         }
             
-        
     }
     
     private func string(from slider: UISlider) -> String {
         String(format: "%.2f", slider.value)
     }
 
-    @IBAction func saveSettingsButton() {
-        view.endEditing(true)
-        delegate.setValues(for: color)
-        dismiss(animated: true)
-    }
-    func tapDone() {
-        self.view.endEditing(true)
-        
-    }
-    
 }
-
 
 extension SettingsViewController: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
@@ -149,7 +146,10 @@ extension SettingsViewController: UITextFieldDelegate {
             blueLabel.text = String(format: "%.2f", numberValue)
             blueSlider.value = numberValue
         }
-        settingsView.backgroundColor = UIColor(displayP3Red: CGFloat(redSlider.value), green: CGFloat(greenSlider.value), blue: CGFloat(blueSlider.value), alpha: 1)
+        settingsView.backgroundColor = UIColor(displayP3Red: CGFloat(redSlider.value),
+                                               green: CGFloat(greenSlider.value),
+                                               blue: CGFloat(blueSlider.value),
+                                               alpha: 1)
     }
 }
 
@@ -159,9 +159,17 @@ extension UITextField{
     let doneToolbar: UIToolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: 300, height: 40))
     doneToolbar.barStyle = UIBarStyle.default
 
-    let flexSpace = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace, target: nil, action: nil)
-    let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: UIBarButtonItem.Style.done, target: self, action: #selector(self.doneButtonAction))
+    let flexSpace = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace,
+                                    target: nil,
+                                    action: nil)
+    let done = UIBarButtonItem(title: "Done",
+                               style: UIBarButtonItem.Style.done,
+                               target: self,
+                               action: #selector(self.doneButtonAction))
 
+    // не понимаю почему в этом методе нужен action с применением objective-C, 
+    // но по-другому не работает:(
+    // И не до конца понимаю этот код, надо еще разобрать или придумать новое.
     var items = [UIBarButtonItem]()
     items.append(flexSpace)
     items.append(done)
@@ -170,8 +178,7 @@ extension UITextField{
     doneToolbar.sizeToFit()
 
     self.inputAccessoryView = doneToolbar
-    
- }// разобраться с функцией ниже из objective-C. Переписать верхнюю функцию самостоятельно.
+ }
     @objc func doneButtonAction(sender: UIBarButtonItem) {
         self.resignFirstResponder()
     }
